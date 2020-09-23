@@ -1,5 +1,5 @@
-clear all
-close all
+% clear all
+% close all
 % delete Agent1_TracePosCovariance_MonteCarlo.dat
 % delete Agent2_TracePosCovariance_MonteCarlo.dat
 % delete Agent3_TracePosCovariance_MonteCarlo.dat
@@ -15,9 +15,9 @@ close all
 % delete Agent3_ConstAnalysis_MonteCarlo.dat
 % delete Agent4_ConstAnalysis_MonteCarlo.dat
 % delete Agent5_ConstAnalysis_MonteCarlo.dat
-clc
-system('caffeinate -dims &');
-start_up
+% clc
+% system('caffeinate -dims &');
+% start_up
 format long e
 mu_Earth = 3.986004415E5;
 c1 = rgb('RosyBrown'); c2 = rgb('Black'); c3 = rgb('Lime');
@@ -91,7 +91,7 @@ end
 %***********************************%
 [n, Num_deputies] = size(RelativeState);
 Period            = 2*pi*sqrt(a1^3/mu_Earth);
-IntegrationTime   = 3*Period;
+IntegrationTime   = 6*Period;
 tvec              = 0:dt:IntegrationTime;
 options           = odeset('RelTol',2.22045e-14,'AbsTol',2.22045e-20);
 
@@ -107,42 +107,10 @@ for k = 1:Num_deputies
     index         = index + 6;
 end
 
-%% C) Visualazing the geomety of the problem
-% Trajectory in the chief's LVLH frame
-%**************************************%
-for j = 1
-    % figure
-    % Label = {'Agent1','Agent2','Agent3','Agent4','Agent5'};
-    % plt   = zeros(5);
-    % plot3(0,0,0,'bo',...
-    %     'LineWidth',2,...
-    %     'MarkerEdgeColor','k',...
-    %     'MarkerFaceColor',c2,...
-    %     'MarkerSize',15);
-    % hold on
-    % grid on
-    % xlabel('X[km]')
-    % ylabel('Y[km]')
-    % zlabel('Z[km]')
-    %
-    % for k = 1:Num_deputies
-    %     plt(k) = plot3(X_Deputy(k).x(1,:),X_Deputy(k).x(2,:),X_Deputy(k).x(3,:));
-    %     hold on
-    %     plot3(X_Deputy(k).x(1,1),X_Deputy(k).x(2,1),X_Deputy(k).x(3,1),'b*',...
-    %     'LineWidth',2,...
-    %     'MarkerEdgeColor','k',...
-    %     'MarkerFaceColor',c1,...
-    %     'MarkerSize',5);
-    %     grid on
-    %     legend(plt(1:k),Label(1:k))
-    % end
-    % axis equal
-end
-
 
 
 %% Monte Carlo
-MC_runs = 20;
+MC_runs = 30;
 progressbar('Monte Carlo Trials','Simulation') % Init 2 bars
 for monte = 1:MC_runs
     
@@ -161,25 +129,6 @@ for monte = 1:MC_runs
     %*********************************************************%
     origin  = zeros(6,1);
     sensor3 = [1000*ones(3,1); zeros(3,1)];
-    T_delay = dt; count = 0;
-    for i = 1:length(tvec)
-        %     if floor(tvec(i)/T_delay)>=count
-        %         index = randi([4 5]);
-        %         sensorID = randi([0 2]);
-        %         coef = randn(p,1);
-        %         v = [sigma1_measurement; sigma2_measurement; sigma3_measurement; sigma4_measurement].*coef;
-        %         Xi = X_Deputy(index).x(:,i);
-        %         if sensorID == 0
-        %             Xj = origin;
-        %         elseif sensorID == 1
-        %             Xj = X_Chief(i,:)';
-        %         elseif sensorID == 2
-        %             Xj = sensor3;
-        %         end
-        %         count = count+1;
-        %         Yabsolute(:, i) = [tvec(i); MeasurementFunc(Xi,Xj) + v; index; sensorID];
-        %     end
-    end
     
     % Relative measurements between deputies
     %****************************************%
@@ -458,16 +407,16 @@ end
         dlmwrite('Agent4_ConstAnalysis_MonteCarlo.dat',ConstAnalysis(4).Data)
         dlmwrite('Agent5_ConstAnalysis_MonteCarlo.dat',ConstAnalysis(5).Data)
         
-        % dlmwrite('Agent1_TracePosCovariance_MonteCarlo.dat',TracePos(1).t(:)')
-        % dlmwrite('Agent2_TracePosCovariance_MonteCarlo.dat',TracePos(2).t(:)')
-        % dlmwrite('Agent3_TracePosCovariance_MonteCarlo.dat',TracePos(3).t(:)')
-        % dlmwrite('Agent4_TracePosCovariance_MonteCarlo.dat',TracePos(4).t(:)')
-        % dlmwrite('Agent5_TracePosCovariance_MonteCarlo.dat',TracePos(5).t(:)')
-        % dlmwrite('Agent1_TraceVelCovariance_MonteCarlo.dat',TraceVel(1).t(:)')
-        % dlmwrite('Agent2_TraceVelCovariance_MonteCarlo.dat',TraceVel(2).t(:)')
-        % dlmwrite('Agent3_TraceVelCovariance_MonteCarlo.dat',TraceVel(3).t(:)')
-        % dlmwrite('Agent4_TraceVelCovariance_MonteCarlo.dat',TraceVel(4).t(:)')
-        % dlmwrite('Agent5_TraceVelCovariance_MonteCarlo.dat',TraceVel(5).t(:)')
+        dlmwrite('Agent1_TracePosCovariance_MonteCarlo.dat',TracePos(1).t(:)')
+        dlmwrite('Agent2_TracePosCovariance_MonteCarlo.dat',TracePos(2).t(:)')
+        dlmwrite('Agent3_TracePosCovariance_MonteCarlo.dat',TracePos(3).t(:)')
+        dlmwrite('Agent4_TracePosCovariance_MonteCarlo.dat',TracePos(4).t(:)')
+        dlmwrite('Agent5_TracePosCovariance_MonteCarlo.dat',TracePos(5).t(:)')
+        dlmwrite('Agent1_TraceVelCovariance_MonteCarlo.dat',TraceVel(1).t(:)')
+        dlmwrite('Agent2_TraceVelCovariance_MonteCarlo.dat',TraceVel(2).t(:)')
+        dlmwrite('Agent3_TraceVelCovariance_MonteCarlo.dat',TraceVel(3).t(:)')
+        dlmwrite('Agent4_TraceVelCovariance_MonteCarlo.dat',TraceVel(4).t(:)')
+        dlmwrite('Agent5_TraceVelCovariance_MonteCarlo.dat',TraceVel(5).t(:)')
     else
         dlmwrite('Agent1_ConstAnalysis_MonteCarlo.dat',ConstAnalysis(1).Data,'-append')
         dlmwrite('Agent2_ConstAnalysis_MonteCarlo.dat',ConstAnalysis(2).Data,'-append')
@@ -475,166 +424,166 @@ end
         dlmwrite('Agent4_ConstAnalysis_MonteCarlo.dat',ConstAnalysis(4).Data,'-append')
         dlmwrite('Agent5_ConstAnalysis_MonteCarlo.dat',ConstAnalysis(5).Data,'-append')
         
-        % dlmwrite('Agent1_TracePosCovariance_MonteCarlo.dat',TracePos(1).t(:)','-append')
-        % dlmwrite('Agent2_TracePosCovariance_MonteCarlo.dat',TracePos(2).t(:)','-append')
-        % dlmwrite('Agent3_TracePosCovariance_MonteCarlo.dat',TracePos(3).t(:)','-append')
-        % dlmwrite('Agent4_TracePosCovariance_MonteCarlo.dat',TracePos(4).t(:)','-append')
-        % dlmwrite('Agent5_TracePosCovariance_MonteCarlo.dat',TracePos(5).t(:)','-append')
-        % dlmwrite('Agent1_TraceVelCovariance_MonteCarlo.dat',TraceVel(1).t(:)','-append')
-        % dlmwrite('Agent2_TraceVelCovariance_MonteCarlo.dat',TraceVel(2).t(:)','-append')
-        % dlmwrite('Agent3_TraceVelCovariance_MonteCarlo.dat',TraceVel(3).t(:)','-append')
-        % dlmwrite('Agent4_TraceVelCovariance_MonteCarlo.dat',TraceVel(4).t(:)','-append')
-        % dlmwrite('Agent5_TraceVelCovariance_MonteCarlo.dat',TraceVel(5).t(:)','-append')
+        dlmwrite('Agent1_TracePosCovariance_MonteCarlo.dat',TracePos(1).t(:)','-append')
+        dlmwrite('Agent2_TracePosCovariance_MonteCarlo.dat',TracePos(2).t(:)','-append')
+        dlmwrite('Agent3_TracePosCovariance_MonteCarlo.dat',TracePos(3).t(:)','-append')
+        dlmwrite('Agent4_TracePosCovariance_MonteCarlo.dat',TracePos(4).t(:)','-append')
+        dlmwrite('Agent5_TracePosCovariance_MonteCarlo.dat',TracePos(5).t(:)','-append')
+        dlmwrite('Agent1_TraceVelCovariance_MonteCarlo.dat',TraceVel(1).t(:)','-append')
+        dlmwrite('Agent2_TraceVelCovariance_MonteCarlo.dat',TraceVel(2).t(:)','-append')
+        dlmwrite('Agent3_TraceVelCovariance_MonteCarlo.dat',TraceVel(3).t(:)','-append')
+        dlmwrite('Agent4_TraceVelCovariance_MonteCarlo.dat',TraceVel(4).t(:)','-append')
+        dlmwrite('Agent5_TraceVelCovariance_MonteCarlo.dat',TraceVel(5).t(:)','-append')
     end
     progressbar(monte/MC_runs) % Update 1st bar
 end % Ending the Monte Carlo loop
-system('killall caffeinate');
+% system('killall caffeinate');
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-%%
-% Plotting the measurements residuals
-Hist_index   = find(tvec >= Period,1);
-indexY       = tvec(1:m)/Period;
-sigma_rho    = 3*sqrt(R(1,1))*ones(1,m);  % Sampeling the covariance in the error
-sigma_rhodot = 3*sqrt(R(2,2))*ones(1,m);  % Sampeling the covariance in the error
-sigma_El     = 3*sqrt(R(3,3))*ones(1,m);  % Sampeling the covariance in the error
-sigma_Az     = 3*sqrt(R(4,4))*ones(1,m);  % Sampeling the covariance in the error
-Label2       = {'Range[km]', 'Range-Rate[km/s]', 'El[rad]', 'Az[rad]'};
-Label3       = {'Range Error','Range-Rate Error', 'El Error', 'Az Error'};
-Sigma_rho    = [sigma_rho;sigma_rhodot;sigma_El;sigma_Az];
-
-for k = 1%:Num_deputies
-    figure('Renderer', 'painters', 'Position', [10 10 900 600])
-    for i=1:4
-        if i == 2
-            iii = 3;
-        elseif i == 3
-            iii = 5;
-        elseif i == 4
-            iii = 7;
-        else
-            iii = i;
-        end
-        subplot(4,2,iii)
-        line1 = plot(indexY,PostfitAgent1(k).y(i,:),'o','Color', c1);
-        hold on
-        line2 = plot(indexY,PostfitAgent2(k).y(i,:),'o','Color', c2);
-        line3 = plot(indexY,PostfitAgent3(k).y(i,:),'o','Color', c3);
-        line5 = plot(indexY,PostfitAgent4(k).y(i,:),'o','Color', c4);
-        plt5 = plot(indexY,PostfitAgent5(k).y(i,:),'o','Color', c5);
-        plot(indexY,Sigma_rho(i,:),'r--',indexY,-Sigma_rho(i,:),'r--')
-        hold off
-        ylabel(Label2(i))
-        xlabel('Period')
-        % legend([plt1,plt2,plt3,plt4,plt5],{'Agent1','Agent2','Agent3','Agent4','Agent5'})
-        
-        
-        subplot(4,2,iii+1)
-        line1 = histogram(PostfitAgent1(k).y(i,Hist_index:end),'FaceColor',c1);
-        hold on
-        line2 = histogram(PostfitAgent2(k).y(i,Hist_index:end),'FaceColor',c2);
-        line3 = histogram(PostfitAgent3(k).y(i,Hist_index:end),'FaceColor',c3);
-        line5 = histogram(PostfitAgent4(k).y(i,Hist_index:end),'FaceColor',c4);
-        plt5 = histogram(PostfitAgent5(k).y(i,Hist_index:end),'FaceColor',c5);
-        xline(Sigma_rho(i,1),'--','LineWidth', 2, 'Color', 'r');
-        xline(-Sigma_rho(i,1),'--','LineWidth', 2, 'Color', 'r');
-        xlabel(Label3(i))
-        set(gca,'view',[90 -90])
-    end
-    % sgt = sgtitle(['Relative Measurements Residual (Agent' num2str(k) ')']);
-    % sgt.FontSize = 35;
-    
-end
-
-%%
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-% Plotting the StateError Residuals
-Label={'$x$[km]', '$\dot{x}$[m/s]', '$y$[km]', '$\dot{y}$[m/s]', '$z$[km]', '$\dot{z}$[m/s]'};
-for k = 1%:Num_deputies
-    StateError = X_updated(k).x - X_Deputy(k).x(:,1:m);
-    StateError = [StateError(1,:);1E3*StateError(4,:);StateError(2,:);1E3*StateError(5,:);StateError(3,:);1E3*StateError(6,:)];
-    Sigma(k).s = [Sigma(k).s(1,:);1E3*Sigma(k).s(4,:);Sigma(k).s(2,:);1E3*Sigma(k).s(5,:);Sigma(k).s(3,:);1E3*Sigma(k).s(6,:)];
-    figure('Renderer', 'painters', 'Position', [10 10 900 600])
-    for i=1:n
-        subplot(n/2,2,i)
-        plot(indexY,StateError(i,1:m),'b')
-        hold on
-        plot(indexY,Sigma(k).s(i,:),'r--',indexY,-Sigma(k).s(i,:),'r--')
-        hold off
-        ylabel(Label(i))
-        xlabel('Period')
-    end
-    % Construct a Legend with the data from the sub-plots
-    hL = legend('State Error$~~~~~~~~~~~~~~~$','Covariance Envelope');
-    % Programatically move the Legend
-    newPosition = [.27 .94 0.5 0.05];
-    newUnits = 'normalized';
-    set(hL,'Position', newPosition,'Units', newUnits,'NumColumns',2);
-    % sgt = sgtitle(['State Residual (Agent' num2str(k) ')']);
-    % sgt.FontSize = 35;
-    
-end
-
-%%
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-% Plotting the StateError Residuals
-close all
-Label={'$x$[km]', '$\dot{x}$[m/s]', '$y$[km]', '$\dot{y}$[m/s]', '$z$[km]', '$\dot{z}$[m/s]'};
-ColorMatrix = [c1;c6;c3;c4;c5;c2];
-figure('Renderer', 'painters', 'Position', [10 10 1000 700])
-for k = 1:Num_deputies
-    plt   = zeros(6);
-    subplot(n/2,2,k)
-    plt2 = yline(3,'--','LineWidth', 2, 'Color', 'r');
-    hold on
-    for i = 1:n
-        plt(:,i) = plot(indexY,ConstAnalysis(k).Data(i,1:m),'Color',ColorMatrix(i,:));
-    end
-    xlabel('Period')
-    hold off
-    grid on
-    clear StateError Sigma2
-end
-hL = legend([plt(end,1),plt(end,2),plt(end,3),plt2,plt(end,4),plt(end,5),plt(end,6)],...
-    {'$x$[km]', '$y$[km]', '$z$[km]','3$\sigma$ Covariance', '$\dot{x}$[m/s]', '$\dot{y}$[m/s]',...
-    '$\dot{z}$[m/s]'});
-newPosition = [0.68 0.17 0.1 0.1];
-newUnits = 'normalized';
-set(hL,'Position', newPosition,'Units', newUnits,'NumColumns',2);
-
-%%
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-% Plotting the trace of the covariance matrices
-figure
-Label = {'Agent1','Agent2','Agent3','Agent4','Agent5'};
-plt   = zeros(5);
-for k = 1:Num_deputies
-    plt(k) = plot(indexY,TracePos(k).t(:));
-    hold on
-    grid on
-    legend(plt(1:k),Label(1:k))
-end
-xlabel('Period')
-ylabel('Trace of P')
-set(gca, 'YScale', 'log')
-
-%%
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-% Plotting the trace of the covariance matrices
-figure
-Label = {'Agent1','Agent2','Agent3','Agent4','Agent5'};
-plt   = zeros(5);
-for k = 1:Num_deputies
-    plt(k) = plot(indexY,TraceVel(k).t(:));
-    hold on
-    grid on
-    legend(plt(1:k),Label(1:k))
-end
-xlabel('Period')
-ylabel('Trace of P')
-set(gca, 'YScale', 'log')
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
+% %%
+% % Plotting the measurements residuals
+% Hist_index   = find(tvec >= Period,1);
+% indexY       = tvec(1:m)/Period;
+% sigma_rho    = 3*sqrt(R(1,1))*ones(1,m);  % Sampeling the covariance in the error
+% sigma_rhodot = 3*sqrt(R(2,2))*ones(1,m);  % Sampeling the covariance in the error
+% sigma_El     = 3*sqrt(R(3,3))*ones(1,m);  % Sampeling the covariance in the error
+% sigma_Az     = 3*sqrt(R(4,4))*ones(1,m);  % Sampeling the covariance in the error
+% Label2       = {'Range[km]', 'Range-Rate[km/s]', 'El[rad]', 'Az[rad]'};
+% Label3       = {'Range Error','Range-Rate Error', 'El Error', 'Az Error'};
+% Sigma_rho    = [sigma_rho;sigma_rhodot;sigma_El;sigma_Az];
+% 
+% for k = 1%:Num_deputies
+%     figure('Renderer', 'painters', 'Position', [10 10 900 600])
+%     for i=1:4
+%         if i == 2
+%             iii = 3;
+%         elseif i == 3
+%             iii = 5;
+%         elseif i == 4
+%             iii = 7;
+%         else
+%             iii = i;
+%         end
+%         subplot(4,2,iii)
+%         line1 = plot(indexY,PostfitAgent1(k).y(i,:),'o','Color', c1);
+%         hold on
+%         line2 = plot(indexY,PostfitAgent2(k).y(i,:),'o','Color', c2);
+%         line3 = plot(indexY,PostfitAgent3(k).y(i,:),'o','Color', c3);
+%         line5 = plot(indexY,PostfitAgent4(k).y(i,:),'o','Color', c4);
+%         plt5 = plot(indexY,PostfitAgent5(k).y(i,:),'o','Color', c5);
+%         plot(indexY,Sigma_rho(i,:),'r--',indexY,-Sigma_rho(i,:),'r--')
+%         hold off
+%         ylabel(Label2(i))
+%         xlabel('Period')
+%         % legend([plt1,plt2,plt3,plt4,plt5],{'Agent1','Agent2','Agent3','Agent4','Agent5'})
+%         
+%         
+%         subplot(4,2,iii+1)
+%         line1 = histogram(PostfitAgent1(k).y(i,Hist_index:end),'FaceColor',c1);
+%         hold on
+%         line2 = histogram(PostfitAgent2(k).y(i,Hist_index:end),'FaceColor',c2);
+%         line3 = histogram(PostfitAgent3(k).y(i,Hist_index:end),'FaceColor',c3);
+%         line5 = histogram(PostfitAgent4(k).y(i,Hist_index:end),'FaceColor',c4);
+%         plt5 = histogram(PostfitAgent5(k).y(i,Hist_index:end),'FaceColor',c5);
+%         xline(Sigma_rho(i,1),'--','LineWidth', 2, 'Color', 'r');
+%         xline(-Sigma_rho(i,1),'--','LineWidth', 2, 'Color', 'r');
+%         xlabel(Label3(i))
+%         set(gca,'view',[90 -90])
+%     end
+%     % sgt = sgtitle(['Relative Measurements Residual (Agent' num2str(k) ')']);
+%     % sgt.FontSize = 35;
+%     
+% end
+% 
+% %%
+% %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
+% % Plotting the StateError Residuals
+% Label={'$x$[km]', '$\dot{x}$[m/s]', '$y$[km]', '$\dot{y}$[m/s]', '$z$[km]', '$\dot{z}$[m/s]'};
+% for k = 1%:Num_deputies
+%     StateError = X_updated(k).x - X_Deputy(k).x(:,1:m);
+%     StateError = [StateError(1,:);1E3*StateError(4,:);StateError(2,:);1E3*StateError(5,:);StateError(3,:);1E3*StateError(6,:)];
+%     Sigma(k).s = [Sigma(k).s(1,:);1E3*Sigma(k).s(4,:);Sigma(k).s(2,:);1E3*Sigma(k).s(5,:);Sigma(k).s(3,:);1E3*Sigma(k).s(6,:)];
+%     figure('Renderer', 'painters', 'Position', [10 10 900 600])
+%     for i=1:n
+%         subplot(n/2,2,i)
+%         plot(indexY,StateError(i,1:m),'b')
+%         hold on
+%         plot(indexY,Sigma(k).s(i,:),'r--',indexY,-Sigma(k).s(i,:),'r--')
+%         hold off
+%         ylabel(Label(i))
+%         xlabel('Period')
+%     end
+%     % Construct a Legend with the data from the sub-plots
+%     hL = legend('State Error$~~~~~~~~~~~~~~~$','Covariance Envelope');
+%     % Programatically move the Legend
+%     newPosition = [.27 .94 0.5 0.05];
+%     newUnits = 'normalized';
+%     set(hL,'Position', newPosition,'Units', newUnits,'NumColumns',2);
+%     % sgt = sgtitle(['State Residual (Agent' num2str(k) ')']);
+%     % sgt.FontSize = 35;
+%     
+% end
+% 
+% %%
+% %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
+% % Plotting the StateError Residuals
+% close all
+% Label={'$x$[km]', '$\dot{x}$[m/s]', '$y$[km]', '$\dot{y}$[m/s]', '$z$[km]', '$\dot{z}$[m/s]'};
+% ColorMatrix = [c1;c6;c3;c4;c5;c2];
+% figure('Renderer', 'painters', 'Position', [10 10 1000 700])
+% for k = 1:Num_deputies
+%     plt   = zeros(6);
+%     subplot(n/2,2,k)
+%     plt2 = yline(3,'--','LineWidth', 2, 'Color', 'r');
+%     hold on
+%     for i = 1:n
+%         plt(:,i) = plot(indexY,ConstAnalysis(k).Data(i,1:m),'Color',ColorMatrix(i,:));
+%     end
+%     xlabel('Period')
+%     hold off
+%     grid on
+%     clear StateError Sigma2
+% end
+% hL = legend([plt(end,1),plt(end,2),plt(end,3),plt2,plt(end,4),plt(end,5),plt(end,6)],...
+%     {'$x$[km]', '$y$[km]', '$z$[km]','3$\sigma$ Covariance', '$\dot{x}$[m/s]', '$\dot{y}$[m/s]',...
+%     '$\dot{z}$[m/s]'});
+% newPosition = [0.68 0.17 0.1 0.1];
+% newUnits = 'normalized';
+% set(hL,'Position', newPosition,'Units', newUnits,'NumColumns',2);
+% 
+% %%
+% %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
+% % Plotting the trace of the covariance matrices
+% figure
+% Label = {'Agent1','Agent2','Agent3','Agent4','Agent5'};
+% plt   = zeros(5);
+% for k = 1:Num_deputies
+%     plt(k) = plot(indexY,TracePos(k).t(:));
+%     hold on
+%     grid on
+%     legend(plt(1:k),Label(1:k))
+% end
+% xlabel('Period')
+% ylabel('Trace of P')
+% set(gca, 'YScale', 'log')
+% 
+% %%
+% %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
+% % Plotting the trace of the covariance matrices
+% figure
+% Label = {'Agent1','Agent2','Agent3','Agent4','Agent5'};
+% plt   = zeros(5);
+% for k = 1:Num_deputies
+%     plt(k) = plot(indexY,TraceVel(k).t(:));
+%     hold on
+%     grid on
+%     legend(plt(1:k),Label(1:k))
+% end
+% xlabel('Period')
+% ylabel('Trace of P')
+% set(gca, 'YScale', 'log')
 
 

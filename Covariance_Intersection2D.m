@@ -34,14 +34,14 @@ for i = 1:N
     
     
     
-%     k1 = omega(i); k2 = 1-omega(i);
-%     Pcc_Unknown = inv( k1*inv(Paa) + k2*inv(Pbb));
-%     h4 = error_ellipse(Pcc_Unknown);
-%     h4.Color = 'r';
-%     if trace(Pcc_Unknown)<Determinant
-%        Pcc_optimal = Pcc_Unknown; 
-%        Determinant = trace(Pcc_Unknown);
-%     end
+    k1 = omega(i); k2 = 1-omega(i);
+    Pcc_Unknown = inv( k1*inv(Paa) + k2*inv(Pbb));
+    h4 = error_ellipse(Pcc_Unknown);
+    h4.Color = 'r';
+    if trace(Pcc_Unknown)<Determinant
+       Pcc_optimal = Pcc_Unknown; 
+       Determinant = trace(Pcc_Unknown);
+    end
 end
 
 h1 = error_ellipse(Paa);
@@ -51,15 +51,15 @@ h2 = error_ellipse(Pbb);
 h2.Color = color2;
 h2.Marker = '+';
 
-% h5 = error_ellipse(Pcc_optimal);
-% h5.Color = 'k';
-% h5.Marker = 'none';
-% h5.LineWidth = 3;
+h5 = error_ellipse(Pcc_optimal);
+h5.Color = 'k';
+h5.Marker = 'none';
+h5.LineWidth = 3;
 
 ylim([-1.5 1.5])
 
 legend([h1, h2, h3],{'$P_{aa}$','$P_{bb}$','$P_{cc}$ (known $P_{ab}$)'},...
     'Location','northwest','NumColumns',2)
 
-% legend([h1, h2, h3, h4, h5],{'$P_{aa}$','$P_{bb}$','$P_{cc}$ (known $P_{ab}$)',...
-% '$P_{cc}$ (function of $\omega$)', '$P_{cc}$ (optimal $\omega^*$)'},'Location','northwest','NumColumns',3)
+legend([h1, h2, h3, h4, h5],{'$P_{aa}$','$P_{bb}$','$P_{cc}$ (known $P_{ab}$)',...
+'$P_{cc}$ (function of $\omega$)', '$P_{cc}$ (optimal $\omega^*$)'},'Location','northwest','NumColumns',3)
