@@ -110,7 +110,7 @@ end
 
 
 %% Monte Carlo
-MC_runs = 30;
+MC_runs = 1000;
 progressbar('Monte Carlo Trials','Simulation') % Init 2 bars
 for monte = 1:MC_runs
     
