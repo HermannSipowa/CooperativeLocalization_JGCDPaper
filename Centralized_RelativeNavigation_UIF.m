@@ -1,21 +1,13 @@
-clear all
+clear variables
 close all
-% delete Agent1_TracePosCovariance_Centralized.dat
-% delete Agent2_TracePosCovariance_Centralized.dat
-% delete Agent3_TracePosCovariance_Centralized.dat
-% delete Agent4_TracePosCovariance_Centralized.dat
-% delete Agent5_TracePosCovariance_Centralized.dat
-% delete Agent1_TraceVelCovariance_Centralized.dat
-% delete Agent2_TraceVelCovariance_Centralized.dat
-% delete Agent3_TraceVelCovariance_Centralized.dat
-% delete Agent4_TraceVelCovariance_Centralized.dat
-% delete Agent5_TraceVelCovariance_Centralized.dat
+delete CentralizedData.mat
 clc
 start_up
 format long e
 mu_Earth = 3.986004415E5;
 c1 = rgb('RosyBrown'); c2 = rgb('Black'); c3 = rgb('Lime');
 c4 = rgb('Tomato'); c5 = rgb('DarkBlue'); c6 = rgb('DarkTurquoise');
+ColorMatrix = [c1;c6;c3;c4;c5;c2];
 dt = 60;
 
 %% A) Defining the inital conditions for the spaceraft in the system
@@ -35,7 +27,7 @@ LitOmg1 = deg2rad(LitOmg1_deg); f = deg2rad(f_deg);
 COE1 = [a1,e1,inc1,BigOmg1,LitOmg1,f];
 [Position_target,Velocity_target]  = COEstoRV(COE1,mu_Earth);
 X_Chief0 = [Position_target; Velocity_target];
-RelativeState = [];
+RelativeState = zeros(6,5);
 for i = 1:5
     % Relative orbital elements of the deputy
     %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
@@ -76,7 +68,7 @@ for i = 1:5
     
     % Storing the relative states
     %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-    RelativeState = [RelativeState, [TR_rel0; TV_rel0]];
+    RelativeState(:,i) = [TR_rel0; TV_rel0];
     
 end
 
@@ -96,6 +88,7 @@ RelativeState = [X_Chief0, RelativeState];
 X_Chief       = Xrel(:,1:n);
 Xrel          = Xrel(:,n+1:end);
 index         = 1:6;
+X_Deputy      = struct('x', cell(1, Num_deputies));
 for k = 1:Num_deputies
     X_Deputy(k).x = Xrel(:,index)';
     index         = index + 6;
@@ -341,9 +334,9 @@ for epoch = 1:m % Measurement start at t=0
             %*********************************%
             H = (P_ap\P_xy)'; Hs = (P_ap\Ps_xy)';
             v = y - y_ap;
-            if det(Hs*P_ap*Hs') ~= 0
-                det(Hs*P_ap*Hs')
-            end
+            % if det(Hs*P_ap*Hs') ~= 0
+            %     det(Hs*P_ap*Hs')
+            % end
             
             z_post = z_post + H'/(R + Hs*P_ap*Hs')*(v + H*X_ap); % + Hs*P_ap*Hs'
             Y_post = Y_post + H'/(R + Hs*P_ap*Hs')*H;
@@ -410,23 +403,19 @@ for epoch = 1:m % Measurement start at t=0
         % Sampeling the covariance inthe error
         %**************************************%
         Sigma(k).s(:,epoch)  = 3*sqrt(diag(P_post(idx_Agent,idx_Agent)));
-        TracePos(k).t(epoch) = det(P_post(idx_Agent(1:3),idx_Agent(1:3)));
-        TraceVel(k).t(epoch) = det(P_post(idx_Agent(4:6),idx_Agent(4:6)));
+        TracePos(k).t(epoch) = trace(P_post(idx_Agent(1:3),idx_Agent(1:3)));
+        TraceVel(k).t(epoch) = trace(P_post(idx_Agent(4:6),idx_Agent(4:6)));
     end
     
 end
 % Storing the trace of the convariance matrice for every element
-% dlmwrite('Agent1_TracePosCovariance_Centralized.dat',TracePos(1).t(:)')
-% dlmwrite('Agent2_TracePosCovariance_Centralized.dat',TracePos(2).t(:)')
-% dlmwrite('Agent3_TracePosCovariance_Centralized.dat',TracePos(3).t(:)')
-% dlmwrite('Agent4_TracePosCovariance_Centralized.dat',TracePos(4).t(:)')
-% dlmwrite('Agent5_TracePosCovariance_Centralized.dat',TracePos(5).t(:)')
-% dlmwrite('Agent1_TraceVelCovariance_Centralized.dat',TraceVel(1).t(:)')
-% dlmwrite('Agent2_TraceVelCovariance_Centralized.dat',TraceVel(2).t(:)')
-% dlmwrite('Agent3_TraceVelCovariance_Centralized.dat',TraceVel(3).t(:)')
-% dlmwrite('Agent4_TraceVelCovariance_Centralized.dat',TraceVel(4).t(:)')
-% dlmwrite('Agent5_TraceVelCovariance_Centralized.dat',TraceVel(5).t(:)')
-
+PosData = [TracePos(1).t(:)';TracePos(2).t(:)';TracePos(3).t(:)';...
+      TracePos(4).t(:)';TracePos(5).t(:)'];
+save('CentralizedData.mat','PosData')
+Mat = matfile('CentralizedData.mat','Writable',true);
+VelData = [TraceVel(1).t(:)';TraceVel(2).t(:)';TraceVel(3).t(:)';...
+      TraceVel(4).t(:)';TraceVel(5).t(:)'];
+Mat.VelData = VelData;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
