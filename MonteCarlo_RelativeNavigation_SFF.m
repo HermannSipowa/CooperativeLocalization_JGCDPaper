@@ -13,7 +13,7 @@ mu_Earth = 3.986004415E5;
 c1 = rgb('RosyBrown'); c2 = rgb('Black'); c3 = rgb('Lime');
 c4 = rgb('Tomato'); c5 = rgb('DarkBlue'); c6 = rgb('DarkTurquoise');
 dt = 60;
-MC_runs = 10; % Number of Monte Carlo simulations
+MC_runs = 1000; % Number of Monte Carlo simulations
 
 %% A) Defining the inital conditions for the spaceraft in the system
 % Target initial conditions(Orbital Elements)
@@ -327,9 +327,8 @@ for Monte = 1:MC_runs
         StateError = [StateError(1,:); StateError(2,:); StateError(3,:); StateError(4,:); StateError(5,:); StateError(6,:)];
         ConstAnalysis(k).Data = StateError./Sigma(k).s;
     end
-    % Storing the trace of the convariance matrice for every element
     
-    
+    %% Storing the trace of the convariance matrice for every element
     if Monte == 1
         % Storing the trace of the covariance at each MC iteration
         PosData_1 = [TracePos(1).t(:)';TracePos(2).t(:)';TracePos(3).t(:)';...
@@ -337,7 +336,7 @@ for Monte = 1:MC_runs
         save('MonteCarloTraceData.mat','PosData_1')
         TraceMat = matfile('MonteCarloTraceData.mat','Writable',true);
         TraceMat.VelData_1 = [TraceVel(1).t(:)';TraceVel(2).t(:)';TraceVel(3).t(:)';...
-                              TraceVel(4).t(:)';TraceVel(5).t(:)'];
+            TraceVel(4).t(:)';TraceVel(5).t(:)'];
         
         % Storing the normalized error for each agent at each MC iteration
         Run_1 =  ConstAnalysis(1).Data;
@@ -363,10 +362,10 @@ for Monte = 1:MC_runs
     else
         Posfield = strcat('PosData_',num2str(Monte));
         TraceMat.(Posfield) = [TracePos(1).t(:)';TracePos(2).t(:)';TracePos(3).t(:)';...
-                               TracePos(4).t(:)';TracePos(5).t(:)'];
+            TracePos(4).t(:)';TracePos(5).t(:)'];
         Velfield = strcat('VelData_',num2str(Monte));
         TraceMat.(Velfield) = [TraceVel(1).t(:)';TraceVel(2).t(:)';TraceVel(3).t(:)';...
-                               TraceVel(4).t(:)';TraceVel(5).t(:)'];
+            TraceVel(4).t(:)';TraceVel(5).t(:)'];
         
         Constfield = strcat('Run_',num2str(Monte));
         Agent1Const.(Constfield) = ConstAnalysis(1).Data;
