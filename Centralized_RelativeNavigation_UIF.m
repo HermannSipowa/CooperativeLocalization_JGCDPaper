@@ -432,7 +432,7 @@ sigma_Az     = 3*sqrt(R(4,4))*ones(1,m);  % Sampeling the covariance in the erro
 Label2       = {'Range[km]', 'Range-Rate[km/s]', 'El[rad]', 'Az[rad]'};
 Label3       = {'Range Error','Range-Rate Error', 'El Error', 'Az Error'};
 Sigma_rho    = [sigma_rho;sigma_rhodot;sigma_El;sigma_Az];
-
+save('indexYCentralized.mat','indexY')
 
 for k = 1%:Num_deputies
     figure('Renderer', 'painters', 'Position', [10 10 900 600])

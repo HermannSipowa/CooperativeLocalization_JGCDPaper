@@ -15,8 +15,8 @@ Agent2_ConstAnalysis = matfile('Agent2_ConstAnalysis.mat');
 Agent3_ConstAnalysis = matfile('Agent3_ConstAnalysis.mat');
 Agent4_ConstAnalysis = matfile('Agent4_ConstAnalysis.mat');
 Agent5_ConstAnalysis = matfile('Agent5_ConstAnalysis.mat');
-idxY = matfile('indexYCentralized.mat'); idxYCentralized = idxY.indexY;
-idxY = matfile('indexYMonteCarlo.mat');  idxYMonteCarlo = idxY.indexY;
+idxY = matfile('indexYcentr.mat'); idxYCentralized = idxY.indexY;
+idxY = matfile('indexY.mat'); idxYCentralized = idxY.indexY;
 MCs = 10;
 m   = size(MonteCarloFilterData.PosData_1,2);
 n   = 6;
@@ -55,7 +55,7 @@ figure('Renderer', 'painters', 'Position', [10 10 1000 700])
 plt   = zeros(MCs, Num_deputies);
 for k = 1:Num_deputies
     subplot(3,2,k);
-    plt(:,k) = plot(idxYMonteCarlo,MCs_Trace(k).Data,'Color',ColorMatrix(k,:));
+    plt(:,k) = plot(idxYCentralized,MCs_Trace(k).Data,'Color',ColorMatrix(k,:));
     hold on
     plt2     = plot(idxYCentralized,Centralized_TracePos(k,:),'Color',c2);
     grid on
@@ -82,7 +82,7 @@ for k = 1:Num_deputies
     hold on
     for i = 1:n
         idx = linesNum + jump(i);
-        plt(:,i) = plot(idxYMonteCarlo,ConstAnalysis(k).Data(idx,:),'Color',ColorMatrix(i,:));
+        plt(:,i) = plot(idxYCentralized,ConstAnalysis(k).Data(idx,:),'Color',ColorMatrix(i,:));
     end
     xlabel('Period')
     ylabel(Label(k))

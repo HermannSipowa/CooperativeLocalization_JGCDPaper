@@ -85,7 +85,8 @@ Period            = 2*pi*sqrt(a1^3/mu_Earth);
 IntegrationTime   = 6*Period;
 tvec              = 0:dt:IntegrationTime;
 options           = odeset('RelTol',2.22045e-14,'AbsTol',2.22045e-20);
-
+indexY            = tvec/Period;
+save('indexYMonteCarlo.mat','indexY')
 % Intagrading the chief's and deputies' trajectory
 %**************************************************%
 RelativeState = [X_Chief0, RelativeState];
