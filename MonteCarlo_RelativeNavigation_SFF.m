@@ -13,7 +13,7 @@ mu_Earth = 3.986004415E5;
 c1 = rgb('RosyBrown'); c2 = rgb('Black'); c3 = rgb('Lime');
 c4 = rgb('Tomato'); c5 = rgb('DarkBlue'); c6 = rgb('DarkTurquoise');
 dt = 60;
-MC_runs = 3; % Number of Monte Carlo simulations
+MC_runs = 1000; % Number of Monte Carlo simulations
 
 %% A) Defining the inital conditions for the spaceraft in the system
 % Target initial conditions(Orbital Elements)
