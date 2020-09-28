@@ -3,7 +3,7 @@ close all
 delete CentralizedData.mat
 clc
 start_up
-format long e
+format shortE %long e
 mu_Earth = 3.986004415E5;
 c1 = rgb('RosyBrown'); c2 = rgb('Black'); c3 = rgb('Lime');
 c4 = rgb('Tomato'); c5 = rgb('DarkBlue'); c6 = rgb('DarkTurquoise');
@@ -84,7 +84,8 @@ options           = odeset('RelTol',2.22045e-14,'AbsTol',2.22045e-20);
 % Intagrading the chief's and deputies' trajectory
 %**************************************************%
 RelativeState = [X_Chief0, RelativeState];
-[~, Xrel]     = ode113(@(t,X_aug)UnperturbedRelativeMotionODE(t,X_aug,mu_Earth,n),tvec,RelativeState,options);
+[~, Xrel]     = ode113(@(t,X_aug)UnperturbedRelativeMotionODE(t,X_aug,...
+                mu_Earth,n),tvec,RelativeState,options);
 X_Chief       = Xrel(:,1:n);
 Xrel          = Xrel(:,n+1:end);
 index         = 1:6;
@@ -135,30 +136,6 @@ sigma2_measurement = 1E-6;
 sigma3_measurement = 1E-3;
 sigma4_measurement = 1E-3;
 
-% Absolute measurements from the chief and ground sensors
-%*********************************************************%
-origin = zeros(6,1);
-sensor3 = [1000*ones(3,1); zeros(3,1)];
-T_delay = dt; count = 0;
-for i = 1:length(tvec)
-%     if floor(tvec(i)/T_delay)>=count
-%         index = randi([4 5]);
-%         sensorID = randi([0 2]);
-%         coef = randn(p,1);
-%         v = [sigma1_measurement; sigma2_measurement; sigma3_measurement; sigma4_measurement].*coef;
-%         Xi = X_Deputy(index).x(:,i);
-%         if sensorID == 0
-%             Xj = origin;
-%         elseif sensorID == 1
-%             Xj = X_Chief(i,:)';
-%         elseif sensorID == 2
-%             Xj = sensor3;
-%         end
-%         count = count+1;
-%         Yabsolute(:, i) = [tvec(i); MeasurementFunc(Xi,Xj) + v; index; sensorID];
-%     end
-end
-
 % Relative measurements between deputies
 %****************************************%
 for i = 1:length(tvec)
@@ -186,7 +163,6 @@ for i = 1:length(tvec)
     end
 end
 
-
 %% (1) Initializing the UKF
 Cov = diag([(1E-1)^2, (1E-1)^2, (1E-1)^2, (1E-5)^2, (1E-5)^2, (1E-5)^2]);
 Q0  = diag([(1E-5)^2, (1E-5)^2, (1E-5)^2, (1E-6)^2, (1E-6)^2, (1E-6)^2]);
@@ -205,7 +181,6 @@ Q = zeros(n*Num_deputies);
 R = diag([(sigma1_measurement)^2 (sigma2_measurement)^2 ...
     sigma3_measurement^2 sigma4_measurement^2]); % Measurement covariance
 
-
 %% (2) Calculating all the weights
 alpha = 1; % Alpha varies from 1E-4 to 1
 beta  = 2;
@@ -213,17 +188,14 @@ L     = n*Num_deputies; % Number of state to be estimated
 kappa = 3-L;
 lamda = alpha^2*(L+kappa)-L;
 gamma = sqrt(L+lamda);
-
-Wo_m = lamda/(L+lamda);
-Wo_c = lamda/(L+lamda)+(1-alpha^2+beta);
-Wi = zeros(1,2*L);
+Wo_m  = lamda/(L+lamda);
+Wo_c  = lamda/(L+lamda)+(1-alpha^2+beta);
+Wi    = zeros(1,2*L);
 for i = 1:2*L
     Wi(i) = 1/(2*(L+lamda));
 end
 Wm = [Wo_m, Wi];
 Wc = [Wo_c, Wi];
-
-
 m = length(tvec);
 progressbar('Simulation') % Init 1 progress bar
 for epoch = 1:m % Measurement start at t=0
@@ -249,7 +221,8 @@ for epoch = 1:m % Measurement start at t=0
             end
         end
         X_aug0 = [X_Chief(epoch-1,:)', Chi_post_reshaped]; [n,mm] = size(X_aug0); index = 1:5;
-        [~, Xtrajs] = ode113(@(t,X_aug)UnperturbedRelativeMotionODE(t,X_aug,mu_Earth,n),[0 dt],X_aug0,options);
+        [~, Xtrajs] = ode113(@(t,X_aug)UnperturbedRelativeMotionODE(t,X_aug,mu_Earth,n),...
+                      [0 dt],X_aug0,options);
         Xtrajs = reshape(Xtrajs(end,:),[n,mm]); Xtrajs = Xtrajs(:,2:end);
         for kk = 1:Num_trajs
             if kk == 1
@@ -284,8 +257,6 @@ for epoch = 1:m % Measurement start at t=0
     Chi_ap = [X_ap, X_ap + gamma*S_ap, X_ap - gamma*S_ap];
     clear P_post X_post
 
-    
-
     %% (4) Message Creation and Sending
     Y_post = zeros(L,L); z_post = zeros(L,1);
     for jj = 1:Num_deputies % The index "jj" refers to the agent doing the tracking
@@ -297,48 +268,35 @@ for epoch = 1:m % Measurement start at t=0
             if Yrel(end, jj, epoch) == ii % Checking if the sensor "jj" measured of agent "ii"
                 y = Yrel(2:p+1, jj, epoch);
                 for j = 1:Num_trajs
-                    Xi = Chi_ap(idx_Agent,j);
-                    Xj = X_Deputy(jj).x(:,epoch); % X_ap(idx_Sensor); % 
+                    Xi  = Chi_ap(idx_Agent,j); Xj = X_Deputy(jj).x(:,epoch); % X_ap(idx_Sensor); % 
+                    Xii = X_ap(idx_Agent); Xjj = Chi_ap(idx_Sensor,j);
                     y_target(:,j) = MeasurementFunc(Xi,Xj);
-                    
-                    Xii = X_ap(idx_Agent);
-                    Xjj = Chi_ap(idx_Sensor,j);
                     ys_sigma(:,j) = MeasurementFunc(Xii,Xjj);
                 end
             end
             
             for j = 1:Num_trajs
-                yi    = y_target(:,j);
-                y_ap  = y_ap+Wm(j)*yi;
-                
-                yii   = ys_sigma(:,j);
-                ys_ap = ys_ap+Wm(j)*yii;
+                yi  = y_target(:,j);  y_ap  = y_ap+Wm(j)*yi; 
+                yii = ys_sigma(:,j);  ys_ap = ys_ap+Wm(j)*yii;
             end
-            
             
             % (4.b) Compute the innovation and cross-correlation covariances
             %***************************************************************%
-            nn    = size(y_ap,1);
-            P_xy  = zeros(L,nn);
-            Ps_xy = zeros(L,nn);
-            
+            nn = size(y_ap,1); P_xy = zeros(L,nn); Ps_xy = zeros(L,nn);
             for j = 1:Num_trajs
-                Xnomi  = Chi_ap(:,j);
-                yi     = y_target(:,j); yii = ys_sigma(:,j);
-                P_xy   = P_xy  + Wc(j)*(Xnomi-X_ap)*(yi-y_ap)';
-                Ps_xy  = Ps_xy + Wc(j)*(Xnomi-X_ap)*(yii-ys_ap)';
+                Xnomi = Chi_ap(:,j);
+                yi    = y_target(:,j); yii = ys_sigma(:,j);
+                P_xy  = P_xy  + Wc(j)*(Xnomi-X_ap)*(yi-y_ap)';
+                Ps_xy = Ps_xy + Wc(j)*(Xnomi-X_ap)*(yii-ys_ap)';
             end
-            
             
             % (4.c) Message sending/reception
             %*********************************%
             H = (P_ap\P_xy)'; Hs = (P_ap\Ps_xy)';
-            v = y - y_ap;
-            % if det(Hs*P_ap*Hs') ~= 0
-            %     det(Hs*P_ap*Hs')
+            % if det(Hs*P_ap*Hs')~=0
+            %     y - y_ap + H*X_ap
             % end
-            
-            z_post = z_post + H'/(R + Hs*P_ap*Hs')*(v + H*X_ap); % + Hs*P_ap*Hs'
+            z_post = z_post + H'/(R + Hs*P_ap*Hs')*(y - y_ap + H*X_ap);
             Y_post = Y_post + H'/(R + Hs*P_ap*Hs')*H;
         end
     end

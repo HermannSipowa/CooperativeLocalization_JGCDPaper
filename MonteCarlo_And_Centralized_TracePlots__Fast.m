@@ -17,7 +17,7 @@ Agent4_ConstAnalysis = matfile('Agent4_ConstAnalysis.mat');
 Agent5_ConstAnalysis = matfile('Agent5_ConstAnalysis.mat');
 idxY = matfile('indexYCentralized.mat'); idxYCentralized = idxY.indexY;
 idxY = matfile('indexYMonteCarlo.mat');  idxYMonteCarlo = idxY.indexY;
-MCs = 1000;
+MCs = 3;
 m   = size(MonteCarloFilterData.PosData_1,2);
 n   = 6;
 p   = 5;
@@ -63,7 +63,8 @@ for k = 1:Num_deputies
     ylabel(sprintf('Trace of P$_{%d}$', k))
     set(gca, 'YScale', 'log')
 end
-hL = legend([plt(end,1),plt(end,2),plt(end,3),plt(end,4),plt(end,5), plt2],{'Agent1','Agent2','Agent3','Agent4','Agent5','Centralized Filter'});
+hL = legend([plt(end,1),plt(end,2),plt(end,3),plt(end,4),plt(end,5), plt2],...
+    {'Agent1','Agent2','Agent3','Agent4','Agent5','Centralized Filter'});
 newPosition = [0.68 0.17 0.1 0.1];
 newUnits = 'normalized';
 set(hL,'Position', newPosition,'Units', newUnits,'NumColumns',2);

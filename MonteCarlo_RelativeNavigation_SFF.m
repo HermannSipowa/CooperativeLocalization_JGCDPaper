@@ -90,7 +90,8 @@ save('indexYMonteCarlo.mat','indexY')
 % Intagrading the chief's and deputies' trajectory
 %**************************************************%
 RelativeState = [X_Chief0, RelativeState];
-[~, Xrel]     = ode113(@(t,X_aug)UnperturbedRelativeMotionODE(t,X_aug,mu_Earth,n),tvec,RelativeState,options);
+[~, Xrel]     = ode113(@(t,X_aug)UnperturbedRelativeMotionODE...
+                (t,X_aug,mu_Earth,n),tvec,RelativeState,options);
 X_Chief       = Xrel(:,1:n);
 Xrel          = Xrel(:,n+1:end);
 index         = 1:6;
@@ -100,26 +101,25 @@ for k = 1:Num_deputies
     index         = index + 6;
 end
 
-
 %% Monte Carlo
 % progressbar('Monte Carlo Trials','Simulation') % Init 2 bars
 for Monte = 1:MC_runs
     
     progressbar([],0) % Reset 2nd bar
     
-    P_post = struct('P', cell(1, Num_deputies));
-    X_post = struct('x', cell(1, Num_deputies));
-    StuctX_ap = struct('x', cell(1, Num_deputies));
-    StructP_ap = struct('P', cell(1, Num_deputies));
+    P_post       = struct('P', cell(1, Num_deputies));
+    X_post       = struct('x', cell(1, Num_deputies));
+    StuctX_ap    = struct('x', cell(1, Num_deputies));
+    StructP_ap   = struct('P', cell(1, Num_deputies));
     StructChi_ap = struct('P', cell(1, Num_deputies));
-    X_updated = struct('x', cell(1, Num_deputies));
-    Sigma     = struct('s', cell(1, Num_deputies));
-    TracePos  = struct('t', cell(1, Num_deputies));
-    TraceVel  = struct('t', cell(1, Num_deputies));
+    X_updated    = struct('x', cell(1, Num_deputies));
+    Sigma        = struct('s', cell(1, Num_deputies));
+    TracePos     = struct('t', cell(1, Num_deputies));
+    TraceVel     = struct('t', cell(1, Num_deputies));
     %% D) Generating the noisy measurements
     p = 4;
     n = 6;
-    Yrel = nan(p+2, Num_deputies, length(tvec));
+    Yrel      = nan(p+2, Num_deputies, length(tvec));
     Yabsolute = nan(p+3, length(tvec));
     sigma1_measurement = 1E-3;
     sigma2_measurement = 1E-6;
@@ -173,7 +173,7 @@ for Monte = 1:MC_runs
     
     Wo_m = lamda/(L+lamda);
     Wo_c = lamda/(L+lamda)+(1-alpha^2+beta);
-    Wi = zeros(1,12);
+    Wi   = zeros(1,12);
     for i = 1:2*L
         Wi(i) = 1/(2*(L+lamda));
     end
@@ -190,15 +190,16 @@ for Monte = 1:MC_runs
         for k = 1:Num_deputies
             % (3.a) Computing Sigma Points (matrix) for t-1
             %**********************************************%
-            S_post = sqrtm(P_post(k).P);
-            Chi_post = [X_post(k).x, X_post(k).x + gamma*S_post, X_post(k).x - gamma*S_post];
-            Num_worker = size(Chi_post,2);
+            S_post     = sqrtm(P_post(k).P);
+            Chi_post   = [X_post(k).x, X_post(k).x + gamma*S_post, X_post(k).x - gamma*S_post];
+            Num_trajs = size(Chi_post,2);
             
             % (3.b) Propagate Sigma Points through non-linear system
             %*******************************************************%
             if ti~=0
                 X_aug0    = [X_Chief(epoch-1,:)', Chi_post]; [n,mm] = size(X_aug0);
-                [~, Xnom] = ode113(@(t,X_aug)UnperturbedRelativeMotionODE(t,X_aug,mu_Earth,n),[0 dt],X_aug0,options);
+                [~, Xnom] = ode113(@(t,X_aug)UnperturbedRelativeMotionODE...
+                            (t,X_aug,mu_Earth,n),[0 dt],X_aug0,options);
                 Xnom      = reshape(Xnom(end,:),[n,mm]); Xnom = Xnom(:,2:end);
             else
                 Xnom      = Chi_post;
@@ -208,12 +209,12 @@ for Monte = 1:MC_runs
             %**************************************************%
             StuctX_ap(k).x  = zeros(n,1);
             StructP_ap(k).P = zeros(n,n);
-            for j = 1:Num_worker
+            for j = 1:Num_trajs
                 Xnomi = Xnom(:,j);
                 StuctX_ap(k).x = StuctX_ap(k).x + Wm(j)*Xnomi; % mean of weighted sigma points
             end
             
-            for j = 1:Num_worker
+            for j = 1:Num_trajs
                 Xnomi = Xnom(:,j);
                 StructP_ap(k).P = StructP_ap(k).P + Wc(j)*...
                     (Xnomi-StuctX_ap(k).x)*(Xnomi-StuctX_ap(k).x)'; % covariance of weighted sigma points
@@ -231,21 +232,22 @@ for Monte = 1:MC_runs
         
         
         %% (4) Message Creation and Sending
-        FromNeighbors = struct('ivector', cell(Num_deputies, Num_deputies), 'Imatrix',cell(Num_deputies, Num_deputies));
+        FromNeighbors = struct('ivector', cell(Num_deputies, Num_deputies),...
+                        'Imatrix',cell(Num_deputies, Num_deputies));
         for jj = 1:Num_deputies % Index "jj" is referening to the agent doing the tracking
-            Chi_ap_sensor = StructChi_ap(jj).x;  % StructChi_dist(jj).x;
-            X_sensor      = StuctX_ap(jj).x;     % StuctX_dist(jj).x;
-            P_ap_sensor   = StructP_ap(jj).P;    % StructP_dist(jj).P;
+            Chi_ap_sensor = StructChi_ap(jj).x;
+            X_sensor      = StuctX_ap(jj).x;
+            P_ap_sensor   = StructP_ap(jj).P;
             
             for ii = 1:Num_deputies % index "ii" is referening the agent being tracked
-                Chi_ap   = StructChi_ap(ii).x; % StructChi_dist(ii).x;
-                X_ap     = StuctX_ap(ii).x;    % StuctX_dist(ii).x;
-                P_ap     = StructP_ap(ii).P;   % StructP_dist(ii).P;
-                y_target = zeros(p,Num_worker); y = zeros(p,1);
-                ys_sigma = zeros(p,Num_worker); ys_ap = zeros(p,1);
+                Chi_ap   = StructChi_ap(ii).x;
+                X_ap     = StuctX_ap(ii).x;
+                P_ap     = StructP_ap(ii).P;
+                y_target = zeros(p,Num_trajs); ys_sigma = zeros(p,Num_trajs); 
+                y = zeros(p,1); ys_ap = zeros(p,1); y_ap = zeros(p,1);
                 if Yrel(end, jj, epoch) == ii % Checking if agent "jj" took a measurement of agent "ii"
                     y = Yrel(2:p+1, jj, epoch);
-                    for j = 1:Num_worker
+                    for j = 1:Num_trajs
                         Xi = Chi_ap(:,j);
                         Xj = X_sensor;
                         y_target(:,j) = MeasurementFunc(Xi,Xj);
@@ -256,8 +258,7 @@ for Monte = 1:MC_runs
                     end
                 end
                 
-                y_ap = zeros(p,1);
-                for j = 1:Num_worker
+                for j = 1:Num_trajs
                     yi    = y_target(:,j);
                     y_ap  = y_ap+Wm(j)*yi;
                     
@@ -271,7 +272,7 @@ for Monte = 1:MC_runs
                 P_xy = zeros(n,nn);
                 Ps_xy = zeros(n,nn);
                 
-                for j = 1:Num_worker
+                for j = 1:Num_trajs
                     Xnomi  = Chi_ap(:,j);
                     yi     = y_target(:,j);
                     P_xy   = P_xy + Wc(j)*(Xnomi-X_ap)*(yi-y_ap)';
@@ -325,7 +326,9 @@ for Monte = 1:MC_runs
     ConstAnalysis = struct('Data', cell(1, Num_deputies));
     for k = 1:Num_deputies
         StateError = X_updated(k).x - X_Deputy(k).x(:,1:m);
-        StateError = [StateError(1,:); StateError(2,:); StateError(3,:); StateError(4,:); StateError(5,:); StateError(6,:)];
+        StateError = [StateError(1,:); StateError(2,:); ...
+                      StateError(3,:); StateError(4,:); ...
+                      StateError(5,:); StateError(6,:)];
         ConstAnalysis(k).Data = StateError./Sigma(k).s;
     end
     
