@@ -1,5 +1,7 @@
-% close all
+close all
+clear variables
 clc
+start_up
 c1 = rgb('RosyBrown'); c2 = rgb('Black'); c3 = rgb('Lime');
 c4 = rgb('Tomato'); c5 = rgb('DarkBlue'); c6 = rgb('DarkTurquoise');
 ColorMatrix = [c1;c6;c3;c4;c5;c2];
@@ -9,15 +11,15 @@ CentralizedFiterData = matfile('CentralizedData.mat');
 Centralized_TracePos = CentralizedFiterData.PosData;
 Centralized_TraceVel = CentralizedFiterData.VelData;
 
-MonteCarloFilterData = matfile('MonteCarloTraceData.mat');
-Agent1_ConstAnalysis = matfile('Agent1_ConstAnalysis.mat');
-Agent2_ConstAnalysis = matfile('Agent2_ConstAnalysis.mat');
-Agent3_ConstAnalysis = matfile('Agent3_ConstAnalysis.mat');
-Agent4_ConstAnalysis = matfile('Agent4_ConstAnalysis.mat');
-Agent5_ConstAnalysis = matfile('Agent5_ConstAnalysis.mat');
+MonteCarloFilterData = matfile('MonteCarloTraceData.mat','Writable',true);
+Agent1_ConstAnalysis = matfile('Agent1_ConstAnalysis.mat','Writable',true);
+Agent2_ConstAnalysis = matfile('Agent2_ConstAnalysis.mat','Writable',true);
+Agent3_ConstAnalysis = matfile('Agent3_ConstAnalysis.mat','Writable',true);
+Agent4_ConstAnalysis = matfile('Agent4_ConstAnalysis.mat','Writable',true);
+Agent5_ConstAnalysis = matfile('Agent5_ConstAnalysis.mat','Writable',true);
 idxY = matfile('indexYCentralized.mat'); idxYCentralized = idxY.indexY;
 idxY = matfile('indexYMonteCarlo.mat');  idxYMonteCarlo = idxY.indexY;
-MCs = 3;
+MCs = 250;
 m   = size(MonteCarloFilterData.PosData_1,2);
 n   = 6;
 p   = 5;

@@ -3,7 +3,7 @@ close all
 delete CentralizedData.mat
 clc
 start_up
-format shortE %long e
+format long e
 mu_Earth = 3.986004415E5;
 c1 = rgb('RosyBrown'); c2 = rgb('Black'); c3 = rgb('Lime');
 c4 = rgb('Tomato'); c5 = rgb('DarkBlue'); c6 = rgb('DarkTurquoise');
@@ -131,10 +131,10 @@ end
 p = 4;
 Yrel = nan(p+2, Num_deputies, length(tvec));
 Yabsolute = nan(p+3, length(tvec));
-sigma1_measurement = 1E-3;
-sigma2_measurement = 1E-6;
-sigma3_measurement = 1E-3;
-sigma4_measurement = 1E-3;
+sigma1_measurement = 1E-2;
+sigma2_measurement = 1E-5;
+sigma3_measurement = 1E-2;
+sigma4_measurement = 1E-2;
 
 % Relative measurements between deputies
 %****************************************%
@@ -268,16 +268,14 @@ for epoch = 1:m % Measurement start at t=0
             if Yrel(end, jj, epoch) == ii % Checking if the sensor "jj" measured of agent "ii"
                 y = Yrel(2:p+1, jj, epoch);
                 for j = 1:Num_trajs
-                    Xi  = Chi_ap(idx_Agent,j); Xj = X_Deputy(jj).x(:,epoch); % X_ap(idx_Sensor); % 
-                    Xii = X_ap(idx_Agent); Xjj = Chi_ap(idx_Sensor,j);
+                    Xi  = Chi_ap(idx_Agent,j); Xj = Chi_ap(idx_Sensor,j);
                     y_target(:,j) = MeasurementFunc(Xi,Xj);
-                    ys_sigma(:,j) = MeasurementFunc(Xii,Xjj);
                 end
             end
             
             for j = 1:Num_trajs
-                yi  = y_target(:,j);  y_ap  = y_ap+Wm(j)*yi; 
-                yii = ys_sigma(:,j);  ys_ap = ys_ap+Wm(j)*yii;
+                yi    = y_target(:,j);  
+                y_ap  = y_ap+Wm(j)*yi; 
             end
             
             % (4.b) Compute the innovation and cross-correlation covariances
@@ -285,19 +283,15 @@ for epoch = 1:m % Measurement start at t=0
             nn = size(y_ap,1); P_xy = zeros(L,nn); Ps_xy = zeros(L,nn);
             for j = 1:Num_trajs
                 Xnomi = Chi_ap(:,j);
-                yi    = y_target(:,j); yii = ys_sigma(:,j);
+                yi    = y_target(:,j);
                 P_xy  = P_xy  + Wc(j)*(Xnomi-X_ap)*(yi-y_ap)';
-                Ps_xy = Ps_xy + Wc(j)*(Xnomi-X_ap)*(yii-ys_ap)';
             end
             
             % (4.c) Message sending/reception
             %*********************************%
-            H = (P_ap\P_xy)'; Hs = (P_ap\Ps_xy)';
-            % if det(Hs*P_ap*Hs')~=0
-            %     y - y_ap + H*X_ap
-            % end
-            z_post = z_post + H'/(R + Hs*P_ap*Hs')*(y - y_ap + H*X_ap);
-            Y_post = Y_post + H'/(R + Hs*P_ap*Hs')*H;
+            H = (P_ap\P_xy)'; 
+            z_post = z_post + H'/R*(y - y_ap + H*X_ap);
+            Y_post = Y_post + H'/R*H;
         end
     end
     
@@ -481,20 +475,4 @@ end
 xlabel('Period')
 ylabel('Trace of P')
 set(gca, 'YScale', 'log')
-
-% %%
-% %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-% % Plotting the trace of the covariance matrices
-% figure
-% Label = {'Agent1','Agent2','Agent3','Agent4','Agent5'};
-% plt   = zeros(5);
-% for k = 1:Num_deputies
-%     plt(k) = plot(indexY,TraceVel(k).t(:));
-%     hold on
-%     grid on
-%     legend(plt(1:k),Label(1:k))
-% end
-% xlabel('Period')
-% ylabel('Trace of P')
-% set(gca, 'YScale', 'log')
 

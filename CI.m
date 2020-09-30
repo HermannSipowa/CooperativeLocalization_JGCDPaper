@@ -1,6 +1,6 @@
 function [CIFused,omega,fmin] = CI(Agent_i,Agent_j)
 
-format long e
+format long
 I1 = Agent_i.Imatrix; i1 = Agent_i.ivector;
 I2 = Agent_j.Imatrix; i2 = Agent_j.ivector;
 % f = @(omega) det(inv(omega * I1 + (1-omega) * I2) / det(inv(I1)) );
@@ -17,8 +17,8 @@ if norm(i2)==0
     omega = 1;
     fmin = 0;
 else
-    f = @(omega) det(inv((omega * I1 + (1-omega) * I2))) / det(inv(I1)); 
-    options = optimset('TolX',2.22045e-20,'Display','off');
+    f = @(omega) det(inv((omega*I1+(1-omega)*I2)))/det(inv(I1));
+    options = optimset('TolFun',2.22045e-14,'TolX',2.22045e-50,'Display','off');
     [omega,fmin] = fminbnd(f,0,1,options);
     % [x,fval]     = fminsearch(f2,0,options);
     % omega = (det(I1+I2)-det(I2)+det(I1))/(2*det(I1+I2));

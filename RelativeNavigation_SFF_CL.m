@@ -1,8 +1,8 @@
-clear all
+clear variables
 close all
 clc
 start_up
-format long e
+format long
 mu_Earth = 3.986004415E5;
 c1 = rgb('RosyBrown'); c2 = rgb('Black'); c3 = rgb('Lime');
 c4 = rgb('Tomato'); c5 = rgb('DarkBlue'); c6 = rgb('DarkTurquoise');
@@ -75,7 +75,7 @@ end
 %***********************************%
 [n, Num_deputies] = size(RelativeState);
 Period            = 2*pi*sqrt(a1^3/mu_Earth);
-IntegrationTime   = 3*Period;
+IntegrationTime   = 6*Period;
 tvec              = 0:dt:IntegrationTime;
 options           = odeset('RelTol',2.22045e-14,'AbsTol',2.22045e-20);
 
@@ -377,9 +377,9 @@ for epoch = 1:m % Measurement start at t=0
             %*********************************%
             H = (P_ap\P_xy)'; Hs = (P_ap_sensor\Ps_xy)';
             v = y - y_ap;
-            if det(Hs*P_ap_sensor*Hs')~= 0
-                det(Hs*P_ap_sensor*Hs')
-            end
+            % if det(Hs*P_ap_sensor*Hs')~= 0
+            %     det(Hs*P_ap_sensor*Hs')
+            % end
             FromNeighbors(jj,ii).ivector = H'/(R + Hs*P_ap_sensor*Hs')*(v + H*X_ap); 
             FromNeighbors(jj,ii).Imatrix = H'/(R + Hs*P_ap_sensor*Hs')*H;            
             

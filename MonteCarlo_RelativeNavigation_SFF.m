@@ -13,7 +13,6 @@ mu_Earth = 3.986004415E5;
 c1 = rgb('RosyBrown'); c2 = rgb('Black'); c3 = rgb('Lime');
 c4 = rgb('Tomato'); c5 = rgb('DarkBlue'); c6 = rgb('DarkTurquoise');
 dt = 60;
-MC_runs = 1000; % Number of Monte Carlo simulations
 
 %% A) Defining the inital conditions for the spaceraft in the system
 % Target initial conditions(Orbital Elements)
@@ -103,10 +102,11 @@ end
 
 %% Monte Carlo
 % progressbar('Monte Carlo Trials','Simulation') % Init 2 bars
+system('caffeinate -dims &');
+MC_runs = 250; % Number of Monte Carlo simulations
 for Monte = 1:MC_runs
     
     progressbar([],0) % Reset 2nd bar
-    
     P_post       = struct('P', cell(1, Num_deputies));
     X_post       = struct('x', cell(1, Num_deputies));
     StuctX_ap    = struct('x', cell(1, Num_deputies));
@@ -228,8 +228,7 @@ for Monte = 1:MC_runs
                 StuctX_ap(k).x + gamma*S_ap,...
                 StuctX_ap(k).x - gamma*S_ap];
         end
-        clear P_post X_post
-        
+        % clear P_post X_post
         
         %% (4) Message Creation and Sending
         FromNeighbors = struct('ivector', cell(Num_deputies, Num_deputies),...
@@ -319,7 +318,7 @@ for Monte = 1:MC_runs
             TraceVel(k).t(epoch) = trace(P_post(k).P(4:6,4:6));
         end
         
-        clear P_ap X_ap Chi_ap CIFused_Info FromNeighbors
+        % clear P_ap X_ap Chi_ap CIFused_Info FromNeighbors
     end
     
     % Storing data for the consistency monte carlo simulation
@@ -379,8 +378,12 @@ for Monte = 1:MC_runs
         Agent5Const.(Constfield) = ConstAnalysis(5).Data;
         
     end
-    clear Yrel P_post X_post Cov R Q X_updated StateError Sigma ConstAnalysis TracePos TraceVel
+    % clear Yrel P_post X_post Cov R Q X_updated StateError Sigma ConstAnalysis TracePos TraceVel
     progressbar(Monte/MC_runs) % Update 1st bar
+    clearvars -except MC_runs Monte Num_deputies...
+               X_Deputy X_Chief p tvec dt options...
+               mu_Earth Agent1Const Agent1Const Agent2Const ...
+               Agent3Const Agent4Const Agent5Const TraceMat
     
 end % Ending the Monte Carlo loop
 system('killall caffeinate');
