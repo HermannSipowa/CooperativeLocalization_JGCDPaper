@@ -377,9 +377,6 @@ for epoch = 1:m % Measurement start at t=0
             %*********************************%
             H = (P_ap\P_xy)'; Hs = (P_ap_sensor\Ps_xy)';
             v = y - y_ap;
-            % if det(Hs*P_ap_sensor*Hs')~= 0
-            %     det(Hs*P_ap_sensor*Hs')
-            % end
             FromNeighbors(jj,ii).ivector = H'/(R + Hs*P_ap_sensor*Hs')*(v + H*X_ap); 
             FromNeighbors(jj,ii).Imatrix = H'/(R + Hs*P_ap_sensor*Hs')*H;            
             
@@ -398,16 +395,6 @@ for epoch = 1:m % Measurement start at t=0
         
         X_post(ii).x = CIFused_Info.Imatrix\CIFused_Info.ivector; 
         P_post(ii).P = inv(CIFused_Info.Imatrix); 
-        % det(P_post(ii).P)
-        
-        % StructP_part(ii).P = inv(CIFused_Info.Imatrix);
-        % StructX_part(ii).x = CIFused_Info.Imatrix\CIFused_Info.ivector;
-        %
-        % % (5.2) Re-compute Sigma Points to incorporate effects of process noise
-        % %***********************************************************************%
-        % S_part = sqrtm(StructP_part(ii).P);
-        % StructChi_part(ii).x = [StructX_part(ii).x, StructX_part(ii).x ...
-        %                         + gamma*S_part, StructX_part(ii).x - gamma*S_part];
     end
     
     %% (6) Umpdating the statellite state
@@ -561,77 +548,105 @@ sigma_rho    = 3*sqrt(R(1,1))*ones(1,m);  % Sampeling the covariance in the erro
 sigma_rhodot = 3*sqrt(R(2,2))*ones(1,m);  % Sampeling the covariance in the error
 sigma_El     = 3*sqrt(R(3,3))*ones(1,m);  % Sampeling the covariance in the error
 sigma_Az     = 3*sqrt(R(4,4))*ones(1,m);  % Sampeling the covariance in the error
-Label2       = {'Range[m]', 'Range-Rate[mm/s]', 'El[rad]', 'Az[rad]'};
-Label3       = {'Range Error','Range-Rate Error', 'El Error', 'Az Error'};
+Label2       = {'Range', 'Range-Rate', 'El', 'Az';'[m]', '[mm/s]', '[mrad]', '[mrad]'};
+Label3       = {'Range','Range-Rate','El','Az';' Histogram',' Histogram',' Histogram',' Histogram'};
 Sigma_rho    = [sigma_rho;sigma_rhodot;sigma_El;sigma_Az];
-
-for k = 5
-% figure('Renderer', 'painters', 'Position', [10 10 900 600])
-% for i=1:2
-% 
-%     if i==2
-%         iii=3;
-%     else
-%         iii=i;
-%     end
-%     subplot(2,2,iii)
-%     plt1 = plot(indexY,AbsPostfitSensor0.y(i,:),'o','Color', c1);
-%     hold on
-%     plt2 = plot(indexY,AbsPostfitSensor1.y(i,:),'o','Color', c2);
-%     plt3 = plot(indexY,AbsPostfitSensor2.y(i,:),'o','Color', c3);
-%     plot(indexY,Sigma_rho(i,:),'r--',indexY,-Sigma_rho(i,:),'r--')
-%     hold off
-%     ylabel(Label2(i))
-%     xlabel('Period')
-%     legend([plt1,plt2,plt3],{'Sensor0','Sensor1','Sensor2'})
-% 
-% 
-%     subplot(2,2,iii+1)
-%     plt1 = histogram(AbsPostfitSensor0.y(i,:),'FaceColor',c1);
-%     hold on
-%     plt2 = histogram(AbsPostfitSensor1.y(i,:),'FaceColor',c2);
-%     plt3 = histogram(AbsPostfitSensor2.y(i,:),'FaceColor',c3);
-%     xlabel(Label3(i))
-%     legend([plt1,plt2,plt3],{'Sensor0','Sensor1','Sensor2'})
-%     set(gca,'view',[90 -90])
-% end
-% sgt = sgtitle(['Absolute Measurements Residual (Agent' num2str(k) ')']);
-% sgt.FontSize = 35;
-    
-end
+ 
 %%
+close all
 for k = 1%:Num_deputies
-    h = figure('Renderer', 'painters', 'Position', [10 10 1000 700]);
+    fh = figure;%('Renderer', 'painters', 'Position', [10 10 1000 700]);
+    % set all units inside figure to normalized so that everything is scaling accordingly
+    set(findall(fh,'Units','pixels'),'Units','normalized');
+    fh.Units = 'inches';
+    fh.OuterPosition = [0 0 13 6.5];
     for i=1:4
         if i == 2
-            iii = 3;
             factor = 1E6;
         elseif i == 3
-            iii = 5;
-            factor = 1;
+            factor = 1E3;
         elseif i == 4
-            iii = 7;
-            factor = 1;
+            factor = 1E3;
         else
-            iii = i;
             factor = 1E3;
         end
-        ax(i) = subplot(4,2,iii);
-        plt1 = plot(indexY,factor*PostfitAgent1(k).y(i,:),'o','Color', c1);
+        subplot(2,2,i);
+        plt1 = plot(indexY,factor*PostfitAgent1(k).y(i,:),'*','Color', c1,...
+        'MarkerEdgeColor',c1,...
+        'MarkerFaceColor',c1,...
+        'MarkerSize',7);
         hold on
-        plt2 = plot(indexY,factor*PostfitAgent2(k).y(i,:),'o','Color', c2);
-        plt3 = plot(indexY,factor*PostfitAgent3(k).y(i,:),'o','Color', c3);
-        plt4 = plot(indexY,factor*PostfitAgent4(k).y(i,:),'o','Color', c4);
-        plt5 = plot(indexY,factor*PostfitAgent5(k).y(i,:),'o','Color', c5);
+        plt2 = plot(indexY,factor*PostfitAgent2(k).y(i,:),'*','Color', c2,...
+        'MarkerEdgeColor',c2,...
+        'MarkerFaceColor',c2,...
+        'MarkerSize',7);
+        plt3 = plot(indexY,factor*PostfitAgent3(k).y(i,:),'*','Color', c3,...
+        'MarkerEdgeColor',c3,...
+        'MarkerFaceColor',c3,...
+        'MarkerSize',7);
+        plt4 = plot(indexY,factor*PostfitAgent4(k).y(i,:),'*','Color', c4,...
+        'MarkerEdgeColor',c4,...
+        'MarkerFaceColor',c4,...
+        'MarkerSize',7);
+        plt5 = plot(indexY,factor*PostfitAgent5(k).y(i,:),'*','Color', c5,...
+        'MarkerEdgeColor',c5,...
+        'MarkerFaceColor',c5,...
+        'MarkerSize',7);
         plt6 = plot(indexY,factor*Sigma_rho(i,:),'r--',indexY,-factor*Sigma_rho(i,:),'r--');
+        ylim([-4 4])
+        ax = gca;
+        ax.FontSize = 30;
         hold off
-        ylabel(Label2(i))
-        xlabel('Period')
-        % ylim([-60 100]);
-        % MagInset(h, ax(i), [1 6 -5 5],[2 5 30 90], {'NW','NW';'SE','SE'});
+        ylabel(Label2(:,i),'FontSize', 30)
+        xlabel('Period','FontSize', 30)
         
-        
-        subplot(4,2,iii+1)
+        if i == 1 || i==2
+            set(gca,'xtick',[])
+            xlabel([])
+        end
+    end
+    % Construct a Legend with the data from the sub-plots
+    hL = legend([plt2,plt3,plt4,plt5,plt6(end)],{'Agent2 residuals$~~$',...
+        'Agent3 residuals$~~$','Agent4 residuals$~~$',...
+        'Agent5 residuals$~~$','3$\sigma$ Covariance Envelope'});
+    % Programatically move the Legend
+    newPosition = [.52 .54 0.0 0.00];
+    newUnits = 'normalized';
+    set(hL,'Position', newPosition,'Units', newUnits,'NumColumns',3);
+    hL.FontSize = 30;
+    % sgt = sgtitle(['Relative Measurements Residual (Agent' num2str(k) ')']);
+    % sgt.FontSize = 35;
+    
+end
+
+% define resolution figure to be saved in dpi
+% res = 1000;
+% % recalculate figure size to be saved
+% set(fh,'PaperPositionMode','manual')
+% fh.PaperUnits = 'inches';
+% fh.PaperPosition = [0 0 16 16];
+% % save figure
+% print(fh,'RelativeMeasurements_postfit_Agent1','-dpng',sprintf('-r%d',res))
+
+%%
+close all
+for k = 1%:Num_deputies    
+    fh = figure;%('Renderer', 'painters', 'Position', [10 10 1000 700]);
+    % set all units inside figure to normalized so that everything is scaling accordingly
+    set(findall(fh,'Units','pixels'),'Units','normalized');
+    fh.Units = 'inches';
+    fh.OuterPosition = [0 0 13 6.5];
+    for i=1:4
+        if i == 2
+            factor = 1E6;
+        elseif i == 3
+            factor = 1E3;
+        elseif i == 4
+            factor = 1E3;
+        else
+            factor = 1E3;
+        end
+        subplot(2,2,i);
         plt11 = histogram(factor*PostfitAgent1(k).y(i,Hist_index:end),'FaceColor',c1);
         hold on
         plt22 = histogram(factor*PostfitAgent2(k).y(i,Hist_index:end),'FaceColor',c2);
@@ -640,21 +655,14 @@ for k = 1%:Num_deputies
         plt55 = histogram(factor*PostfitAgent5(k).y(i,Hist_index:end),'FaceColor',c5);
         xline(factor*Sigma_rho(i,1),'--','LineWidth', 2, 'Color', 'r');
         xline(-factor*Sigma_rho(i,1),'--','LineWidth', 2, 'Color', 'r');
-        xlabel(Label3(i))
+        ax = gca;
+        ax.FontSize = 30;
+        xlabel(Label3(:,i), 'FontSize', 30)
         set(gca,'view',[90 -90])
-    end
-    % Construct a Legend with the data from the sub-plots
-    hL = legend([plt2,plt3,plt4,plt5,plt6(end)],{'Agent2 residuals$~~$',...
-        'Agent3 residuals$~~$','Agent4 residuals$~~$',...
-        'Agent5 residuals$~~$','3$\sigma$ Covariance Envelope'});
-    % Programatically move the Legend
-    newPosition = [.27 .94 0.5 0.05];
-    newUnits = 'normalized';
-    set(hL,'Position', newPosition,'Units', newUnits,'NumColumns',5);
-    % sgt = sgtitle(['Relative Measurements Residual (Agent' num2str(k) ')']);
-    % sgt.FontSize = 35;
-    
+%         ylim([0 80])
+    end    
 end
+
 
 %%
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
@@ -670,14 +678,17 @@ for k = 1%:Num_deputies
         plot(indexY,StateError(i,1:m),'b')
         hold on
         plot(indexY,Sigma2(i,:),'r--',indexY,-Sigma2(i,:),'r--')
+        ax = gca;
+        ax.FontSize = 30;
         hold off
-        ylabel(Label(i))
-        xlabel('Period')
+        ylabel(Label(i), 'FontSize', 30)
+        xlabel('Period', 'FontSize', 30)
     end
     % Construct a Legend with the data from the sub-plots
     hL = legend('State Error$~~~~~~~~~~~~~~~$','3$\sigma$ Covariance Envelope');
     % Programatically move the Legend
     newPosition = [.27 .94 0.5 0.05];
+    hL.FontSize = 30;
     newUnits = 'normalized';
     set(hL,'Position', newPosition,'Units', newUnits,'NumColumns',2);
     % sgt = sgtitle(['State Residual (Agent' num2str(k) ')']);
@@ -705,8 +716,8 @@ for k = 1:Num_deputies
     for i = 1:n
         plt(:,i) = plot(indexY,Data(i,1:m),'Color',ColorMatrix(i,:));
     end
-    xlabel('Period')
-    ylabel(Label(k))
+    xlabel('Period', 'FontSize', 30)
+    ylabel(Label(k), 'FontSize', 30)
     hold off
     grid on
     clear StateError Sigma2
@@ -714,7 +725,8 @@ end
 hL = legend([plt(end,1),plt(end,2),plt(end,3),plt2,plt(end,4),plt(end,5),plt(end,6)],...
     {'$x$[km]', '$y$[km]', '$z$[km]','3$\sigma$ Covariance', '$\dot{x}$[m/s]', '$\dot{y}$[m/s]',...
     '$\dot{z}$[m/s]'});
-newPosition = [0.68 0.17 0.1 0.1];
+hL.FontSize = 27;
+newPosition = [0.68 0.19 0.1 0.1];
 newUnits = 'normalized';
 set(hL,'Position', newPosition,'Units', newUnits,'NumColumns',2);
 
@@ -725,13 +737,16 @@ figure
 Label = {'Agent1','Agent2','Agent3','Agent4','Agent5'};
 plt   = zeros(5);
 for k = 1:Num_deputies
-    plt(k) = plot(indexY,TracePos(k).t(:));
+    plt(:,k) = plot(indexY,TracePos(k).t(:));
     hold on
     grid on
-    legend(plt(1:k),Label(1:k))
+    
 end
-xlabel('Period')
-ylabel('Trace of P')
+hL = legend([plt(end,1),plt(end,2),plt(end,3),plt(end,4),plt(end,5)],...
+      {'Agent1','Agent2','Agent3','Agent4','Agent5'});
+hL.FontSize = 23;
+xlabel('Period', 'FontSize', 23)
+ylabel('Trace of P', 'FontSize', 23)
 set(gca, 'YScale', 'log')
 
 % %%

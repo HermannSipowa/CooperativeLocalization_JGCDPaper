@@ -15,7 +15,9 @@ Agent2_ConstAnalysis = matfile('Agent2_ConstAnalysis.mat');
 Agent3_ConstAnalysis = matfile('Agent3_ConstAnalysis.mat');
 Agent4_ConstAnalysis = matfile('Agent4_ConstAnalysis.mat');
 Agent5_ConstAnalysis = matfile('Agent5_ConstAnalysis.mat');
-MCs = 50;
+idxY = matfile('indexYCentralized.mat'); idxYCentralized = idxY.indexY;
+idxY = matfile('indexYMonteCarlo.mat');  idxYMonteCarlo = idxY.indexY;
+MCs = 724;
 m   = size(MonteCarloFilterData.PosData_1,2);
 n   = 6;
 p   = 5;
@@ -49,39 +51,28 @@ end
 
 
 %% Plotting the trace of the position components
-% MonteCarlo_TracePos(1).Data  = dlmread('Agent1_TracePosCovariance_MonteCarlo.dat');
-% MonteCarlo_TracePos(2).Data  = dlmread('Agent2_TracePosCovariance_MonteCarlo.dat');
-% MonteCarlo_TracePos(3).Data  = dlmread('Agent3_TracePosCovariance_MonteCarlo.dat');
-% MonteCarlo_TracePos(4).Data  = dlmread('Agent4_TracePosCovariance_MonteCarlo.dat');
-% MonteCarlo_TracePos(5).Data  = dlmread('Agent5_TracePosCovariance_MonteCarlo.dat');
-
-figure('Renderer', 'painters', 'Position', [10 10 1000 700])
-plt   = zeros(MCs, Num_deputies);
-for k = 1:Num_deputies
-    subplot(3,2,k);
-    plt(:,k) = plot(indexY,MCs_Trace(k).Data,'Color',ColorMatrix(k,:));
-    hold on
-    plt2     = plot(indexY,Centralized_TracePos(k,:),'Color',c2);
-    grid on
-    xlabel('Period')
-    ylabel(sprintf('Trace of P$_{%d}$', k))
-    set(gca, 'YScale', 'log')
-end
-hL = legend([plt(end,1),plt(end,2),plt(end,3),plt(end,4),plt(end,5), plt2],{'Agent1','Agent2','Agent3','Agent4','Agent5','Centralized Filter'});
-newPosition = [0.68 0.17 0.1 0.1];
-newUnits = 'normalized';
-set(hL,'Position', newPosition,'Units', newUnits,'NumColumns',2);
+% 
+% figure('Renderer', 'painters', 'Position', [10 10 1000 700])
+% plt   = zeros(MCs, Num_deputies);
+% for k = 1:Num_deputies
+%     subplot(3,2,k);
+%     plt(:,k) = plot(indexY,MCs_Trace(k).Data,'Color',ColorMatrix(k,:));
+%     hold on
+%     plt2     = plot(indexY,Centralized_TracePos(k,:),'Color',c2);
+%     grid on
+%     xlabel('Period')
+%     ylabel(sprintf('Trace of P$_{%d}$', k))
+%     set(gca, 'YScale', 'log')
+% end
+% hL = legend([plt(end,1),plt(end,2),plt(end,3),plt(end,4),plt(end,5), plt2],{'Agent1','Agent2','Agent3','Agent4','Agent5','Centralized Filter'});
+% newPosition = [0.68 0.17 0.1 0.1];
+% newUnits = 'normalized';
+% set(hL,'Position', newPosition,'Units', newUnits,'NumColumns',2);
 
 
 
 %% Consistency Analysis
 
-% ConstAnalysis(1).Data  = dlmread('Agent1_ConstAnalysis_MonteCarlo.dat');
-% ConstAnalysis(2).Data  = dlmread('Agent2_ConstAnalysis_MonteCarlo.dat');
-% ConstAnalysis(3).Data  = dlmread('Agent3_ConstAnalysis_MonteCarlo.dat');
-% ConstAnalysis(4).Data  = dlmread('Agent4_ConstAnalysis_MonteCarlo.dat');
-% ConstAnalysis(5).Data  = dlmread('Agent5_ConstAnalysis_MonteCarlo.dat');
-% n = 6; MCs = size(ConstAnalysis(5).Data,1)/n;
 Label = {'Agent1','Agent2','Agent3','Agent4','Agent5'};
 figure('Renderer', 'painters', 'Position', [10 10 1000 700])
 for ii = 1:MCs
@@ -93,7 +84,7 @@ for ii = 1:MCs
         yline(-3,'--','LineWidth', 2, 'Color', 'r');
         hold on
         for i = 1:n
-            plt(:,i) = plot(indexY,ConstAnalysis(k).Data(idx(i),:),'Color',ColorMatrix(i,:));
+            plt(:,i) = plot(idxYMonteCarlo,ConstAnalysis(k).Data(idx(i),:),'Color',ColorMatrix(i,:));
         end
         xlabel('Period')
         ylabel(Label(k))
